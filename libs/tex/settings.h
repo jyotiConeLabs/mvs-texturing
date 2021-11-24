@@ -93,6 +93,8 @@ struct Settings {
     bool hole_filling = true;
     bool keep_unseen_faces = false;
     bool nadir_mode = false;
+
+    int max_texture_size = 8 * 1024;
 };
 
 TEX_NAMESPACE_END

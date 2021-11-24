@@ -19,6 +19,7 @@
 #define KEEP_UNSEEN_FACES "keep_unseen_faces"
 #define NADIR_MODE    "nadir_mode"
 #define NUM_THREADS "num_threads"
+#define MAX_TEXTURE_SIZE "max_texture_size"
 
 Arguments parse_args(int argc, char **argv) {
     util::Arguments args;
@@ -92,6 +93,8 @@ Arguments parse_args(int argc, char **argv) {
         "Do not write out intermediate results");
     args.add_option('\0', NUM_THREADS, true,
         "How many threads to use. Set 1 for determinism.");
+    args.add_option('\0', MAX_TEXTURE_SIZE, true,
+        "Maximum size of output textures.");
     args.parse(argc, argv);
 
     Arguments conf;
@@ -153,6 +156,8 @@ Arguments parse_args(int argc, char **argv) {
                 conf.write_intermediate_results = false;
             } else if (i->opt->lopt == NUM_THREADS) {
                 conf.num_threads = std::stoi(i->arg);
+            } else if (i->opt->lopt == MAX_TEXTURE_SIZE) {
+                conf.settings.max_texture_size = std::stoi(i->arg);
             } else {
                 throw std::invalid_argument("Invalid long option");
             }
