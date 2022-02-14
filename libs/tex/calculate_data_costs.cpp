@@ -217,9 +217,10 @@ calculate_face_projection_infos(mve::TriangleMesh::ConstPtr mesh,
                 if (!texture_view->inside(v1, v2, v3))
                     continue;
 
+                bool visible = true;
                 if (!vertical && settings.geometric_visibility_test) {
                     /* Viewing rays do not collide? */
-                    bool visible = true;
+                   
                     math::Vec3f const * samples[] = {&v1, &v2, &v3};
                     // TODO: random monte carlo samples...
 
@@ -237,7 +238,7 @@ calculate_face_projection_infos(mve::TriangleMesh::ConstPtr mesh,
                             break;
                         }
                     }
-                    if (!visible) continue;
+                    if (!visible && !settings.nadir_mode) continue;
                 }
 
                 FaceProjectionInfo info = {j, 0.0f, math::Vec3f(0.0f, 0.0f, 0.0f)};
@@ -256,7 +257,11 @@ calculate_face_projection_infos(mve::TriangleMesh::ConstPtr mesh,
                 if (settings.nadir_mode){
                     float m1 = up.dot(face_to_view_vec);
                     float m2 = up.dot(viewing_direction);
-                    info.quality = (m1*m1)*(m1*m1)*(m2*m2);
+                    float score = (m1*m1)*(m1*m1)*(m2*m2);
+                    if (!visible) info.quality = 1.0f * score;
+                    else{
+                        info.quality = std::max(1.0f, 10000.0f * score);
+                    }
                 }
 
                 /* Change color space. */
