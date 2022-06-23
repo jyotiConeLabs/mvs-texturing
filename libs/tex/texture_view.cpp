@@ -74,8 +74,7 @@ TextureView::load_image(void) {
 
     if (image_mask == NULL){
         try{
-            std::string mask_file = util::fs::dirname(image_file) + "/../masks/" +
-                                    util::fs::replace_extension(util::fs::basename(image_file), "png");
+            std::string mask_file = util::fs::dirname(image_file) + "/../masks/" + util::fs::basename(image_file) + ".png";
             if (util::fs::file_exists(mask_file.c_str())){
                 image_mask = mve::image::load_png_file(mask_file);
 
