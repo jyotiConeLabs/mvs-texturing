@@ -166,7 +166,8 @@ local_seam_leveling(UniGraph const & graph, mve::TriangleMesh::ConstPtr mesh,
             TexturePatch::Ptr texture_patch = texture_patches->at(projection_info.texture_patch_id);
             if (texture_patch->get_label() == 0) continue;
             math::Vec3f color = texture_patch->get_pixel_value(projection_info.projection);
-            color_accum.add(color, 1.0f);
+            if (color[0] <= 0.9 && color[1] <= 0.9 && color[2] <= 0.9 &&
+                color[0] >= 0.1 && color[1] >= 0.1 && color[2] >= 0.1) color_accum.add(color, 1.0f);
         }
 	if (color_accum.w == 0.0f) continue;
 
