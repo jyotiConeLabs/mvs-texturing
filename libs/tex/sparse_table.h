@@ -130,7 +130,6 @@ SparseTable<C, R, T>::save_to_file(SparseTable const & sparse_table, const std::
             out.write((char const*)&col, sizeof(C));
             out.write((char const*)&row, sizeof(R));
             out.write((char const*)&value, sizeof(T));
-            std::cout << "col" << col << "row" << row << "value" << value << std::endl;
         }
     }
     out.close();
