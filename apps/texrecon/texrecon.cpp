@@ -81,6 +81,9 @@ int main(int argc, char **argv) {
     timer.measure("Loading");
 
     std::size_t const num_faces = mesh->get_faces().size() / 3;
+    
+    std::cout << "Number of Faces: " << mesh->get_faces().size() << std::endl;
+    std::cout << "Number of Vertices: " << mesh->get_vertices().size() << std::endl;
 
     std::cout << "Building adjacency graph: " << std::endl;
     tex::Graph graph(num_faces);
