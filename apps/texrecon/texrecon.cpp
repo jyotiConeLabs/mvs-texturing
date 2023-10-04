@@ -237,10 +237,10 @@ int main(int argc, char **argv) {
     }
 
     /* Remove temporary files. */
-    for (util::fs::File const & file : util::fs::Directory(tmp_dir)) {
-        util::fs::unlink(util::fs::join_path(file.path, file.name).c_str());
-    }
-    util::fs::rmdir(tmp_dir.c_str());
+    // for (util::fs::File const & file : util::fs::Directory(tmp_dir)) {
+    //     util::fs::unlink(util::fs::join_path(file.path, file.name).c_str());
+    // }
+    // util::fs::rmdir(tmp_dir.c_str());
 
     return EXIT_SUCCESS;
 }
