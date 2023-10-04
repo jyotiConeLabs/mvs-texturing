@@ -142,6 +142,7 @@ int main(int argc, char **argv) {
         /* Transfer labeling to graph. */
         for (std::size_t i = 0; i < labeling.size(); ++i) {
             const std::size_t label = labeling[i];
+            std::cout << "Label: " << label << std::endl;
             if (label > texture_views.size()){
                 std::cerr << "Wrong labeling file for this mesh/scene combination... aborting!" << std::endl;
                 std::exit(EXIT_FAILURE);
