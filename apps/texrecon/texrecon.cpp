@@ -89,6 +89,8 @@ int main(int argc, char **argv) {
     tex::Graph graph(num_faces);
     tex::build_adjacency_graph(mesh, mesh_info, &graph);
 
+    std::cout << "Number of Graph Nodes: " << graph.num_nodes() << std::endl;
+
     if (conf.labeling_file.empty()) {
         std::cout << "View selection:" << std::endl;
         util::WallTimer rwtimer;
