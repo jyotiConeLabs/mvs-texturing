@@ -84,6 +84,8 @@ generate_candidate(int label, TextureView const & texture_view,
     std::vector<std::size_t> const & faces, mve::TriangleMesh::ConstPtr mesh,
     Settings const & settings) {
 
+    std::cout << "Image Name: " << texture_view.image_file << std::endl;
+    
     mve::ImageBase::Ptr view_image = texture_view.get_image();
     int min_x = view_image->width(), min_y = view_image->height();
     int max_x = 0, max_y = 0;
