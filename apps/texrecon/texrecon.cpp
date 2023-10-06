@@ -81,15 +81,10 @@ int main(int argc, char **argv) {
     timer.measure("Loading");
 
     std::size_t const num_faces = mesh->get_faces().size() / 3;
-    
-    std::cout << "Number of Faces: " << mesh->get_faces().size() << std::endl;
-    std::cout << "Number of Vertices: " << mesh->get_vertices().size() << std::endl;
 
     std::cout << "Building adjacency graph: " << std::endl;
     tex::Graph graph(num_faces);
     tex::build_adjacency_graph(mesh, mesh_info, &graph);
-
-    std::cout << "Number of Graph Nodes: " << graph.num_nodes() << std::endl;
 
     if (conf.labeling_file.empty()) {
         std::cout << "View selection:" << std::endl;
@@ -126,9 +121,6 @@ int main(int argc, char **argv) {
         timer.measure("Running MRF optimization");
         std::cout << "\tTook: " << rwtimer.get_elapsed_sec() << "s" << std::endl;
 
-        for (std::size_t i = 0; i < graph.num_nodes(); ++i) {
-            std::cout << "Label: " << graph.get_label(i) << std::endl;
-        }
         /* Write labeling to file. */
         if (conf.write_intermediate_results) {
             std::vector<std::size_t> labeling(graph.num_nodes());
