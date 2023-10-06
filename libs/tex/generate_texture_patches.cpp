@@ -92,10 +92,12 @@ generate_candidate(int label, TextureView const & texture_view,
     mve::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
 
     std::vector<math::Vec2f> texcoords;
+    std::vector<unsigned long> vertices;
     for (std::size_t i = 0; i < faces.size(); ++i) {
         for (std::size_t j = 0; j < 3; ++j) {
             // std::cout << "Vertex Id: " << mesh_faces[faces[i] * 3 + j] << std::endl;
-            std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
+            vertices.push_back(vertices[mesh_faces[faces[i] * 3 + j]]);
+            // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
             
             math::Vec3f vertex = vertices[mesh_faces[faces[i] * 3 + j]];
@@ -109,6 +111,7 @@ generate_candidate(int label, TextureView const & texture_view,
             max_y = std::max(static_cast<int>(std::ceil(pixel[1])), max_y);
         }
     }
+    std::cout << "Vertex IDs: " << vertices << std::endl;
 
     /* Check for valid projections/erroneous labeling files. */
     assert(min_x >= 0);
