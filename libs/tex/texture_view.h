@@ -50,7 +50,6 @@ class TextureView {
         math::Matrix4f world_to_cam;
         int width;
         int height;
-        std::string image_file;
         mve::ImageBase::Ptr image;
         mve::ByteImage::Ptr image_mask;
         mve::ImageBase::Ptr gradient_magnitude;
@@ -58,6 +57,9 @@ class TextureView {
         bool grayscale;
 
     public:
+
+        std::string image_file;
+
         /** Returns the id of the TexureView which is consistent for every run. */
         std::size_t get_id(void) const;
 
