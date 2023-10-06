@@ -83,8 +83,6 @@ TexturePatchCandidate
 generate_candidate(int label, TextureView const & texture_view,
     std::vector<std::size_t> const & faces, mve::TriangleMesh::ConstPtr mesh,
     Settings const & settings) {
-
-    std::cout << "Image Name: " << texture_view.image_file << std::endl;
     
     mve::ImageBase::Ptr view_image = texture_view.get_image();
     int min_x = view_image->width(), min_y = view_image->height();
@@ -93,11 +91,10 @@ generate_candidate(int label, TextureView const & texture_view,
     mve::TriangleMesh::FaceList const & mesh_faces = mesh->get_faces();
     mve::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
 
-    std::cout << "Vertex: " << vertices[mesh_faces[faces[0]]] << std::endl;
-
     std::vector<math::Vec2f> texcoords;
     for (std::size_t i = 0; i < faces.size(); ++i) {
         for (std::size_t j = 0; j < 3; ++j) {
+            std::cout << "Vertex Id: " << mesh_faces[faces[i] * 3 + j] << " Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << " Image Name: " << texture_view.image_file << std::endl;
             math::Vec3f vertex = vertices[mesh_faces[faces[i] * 3 + j]];
             math::Vec2f pixel = texture_view.get_pixel_coords(vertex);
 
