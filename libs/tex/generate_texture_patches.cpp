@@ -90,7 +90,7 @@ generate_candidate(int label, TextureView const & texture_view,
 
     mve::TriangleMesh::FaceList const & mesh_faces = mesh->get_faces();
     mve::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
-
+    std::cout << "Logging" << std::endl;
     std::vector<math::Vec2f> texcoords;
     std::vector<unsigned long> vertex_indices;
     for (std::size_t i = 0; i < faces.size(); ++i) {
@@ -112,7 +112,9 @@ generate_candidate(int label, TextureView const & texture_view,
         }
     }
 
-    for (unsigned long i: vertex_indices) std::cout << i << std::endl;
+    for (std::size_t i = 0; i < vertex_indices.size(); ++i) {
+        std::cout << "Vertex Id: " << vertex_indices[i] << std::endl;
+    }
 
     // std::cout << "Vertex IDs: " << vertex_indices << std::endl;
 
