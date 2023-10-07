@@ -111,7 +111,7 @@ generate_candidate(int label, TextureView const & texture_view,
             max_y = std::max(static_cast<int>(std::ceil(pixel[1])), max_y);
         }
     }
-    std::cout << "Vertex IDs: " << vertex_indices << std::endl;
+    // std::cout << "Vertex IDs: " << vertex_indices << std::endl;
 
     /* Check for valid projections/erroneous labeling files. */
     assert(min_x >= 0);
