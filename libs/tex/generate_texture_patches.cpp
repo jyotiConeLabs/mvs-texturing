@@ -568,6 +568,10 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
+    for (auto i : image_associations) {
+        cout << '\t' << i.first << '\t' << i.second << '\n';
+    }
+
     merge_vertex_projection_infos(vertex_projection_infos);
 
     {
