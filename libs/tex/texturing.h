@@ -88,7 +88,8 @@ void generate_texture_patches(UniGraph const & graph,
     TextureViews * texture_views,
     Settings const & settings,
     VertexProjectionInfos * vertex_projection_infos,
-    TexturePatches * texture_patches);
+    TexturePatches * texture_patches,
+    std::string& image_asso_file);
 
 /**
   * Runs the seam leveling procedure proposed by Ivanov and Lempitsky
