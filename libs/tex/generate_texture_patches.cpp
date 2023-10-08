@@ -14,7 +14,7 @@
 #include <mve/image_tools.h>
 #include <Eigen/SparseCore>
 #include <Eigen/SparseLU>
-#include "flatbuffers.h"
+#include "flatbuffers/flatbuffers.h"
 
 #include "texturing.h"
 
