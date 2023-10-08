@@ -43,7 +43,7 @@ void serializeToCLIA(const std::string& outputFileName,
                      const std::map<int, std::string>& imageIdToName) {
     
     flatbuffers::FlatBufferBuilder builder;
-
+    std::cout << "Saving View Associations" << std::endl;
     // Serialized ImageFile objects
     std::vector<flatbuffers::Offset<ImageAssociationModel::ImageFile>> imageFileOffsets;
 
@@ -54,6 +54,7 @@ void serializeToCLIA(const std::string& outputFileName,
         imageFileOffsets.push_back(imageFileOffset);
     }
 
+    std::cout << "Saving View Associations 2" << std::endl;
     // Serialized ImageGroup objects
     std::vector<flatbuffers::Offset<ImageAssociationModel::ImageGroup>> imageGroupOffsets;
 
@@ -66,6 +67,7 @@ void serializeToCLIA(const std::string& outputFileName,
         imageGroupOffsets.push_back(imageGroupOffset);
     }
 
+    std::cout << "Saving View Associations 3" << std::endl;
     // Serialize ModelData, which will encapsulate all our data
     auto imagesOffset = builder.CreateVector(imageFileOffsets);
     auto imageGroupsOffset = builder.CreateVector(imageGroupOffsets);
@@ -74,6 +76,7 @@ void serializeToCLIA(const std::string& outputFileName,
     // Complete the serialization by attaching a file identifier
     ImageAssociationModel::FinishModelDataBuffer(builder, modelData);
 
+    std::cout << "Saving View Associations 4" << std::endl;
     // Write the serialized data to file
     std::ofstream outFile(outputFileName, std::ios::binary);
     if (!outFile.is_open()) {
