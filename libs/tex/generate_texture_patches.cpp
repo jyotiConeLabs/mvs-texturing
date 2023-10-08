@@ -557,9 +557,9 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         std::vector<std::vector<std::size_t> > subgraphs;
         int const label = i + 1;
         graph.get_subgraphs(label, &subgraphs);
-
+        std::cout << "\tRunning... 2" << std::flush;
         TextureView * texture_view = &texture_views->at(i);
-        image_names[label] = static_cast<std::string>(texture_view->image_file);
+        image_names[static_cast<int>(label)] = static_cast<std::string>(texture_view->image_file);
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
