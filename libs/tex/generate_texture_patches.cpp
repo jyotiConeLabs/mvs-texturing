@@ -41,7 +41,7 @@ T clamp(T const & v, T const & lo, T const & hi) {
 void serializeToCLIA(const std::string& outputFileName,
                      const std::map<unsigned long, unsigned int>& vertexToImageId,
                      const std::map<unsigned int, std::string>& imageIdToName) {
-
+    
     flatbuffers::FlatBufferBuilder builder;
 
     // Serialized ImageFile objects
@@ -61,7 +61,7 @@ void serializeToCLIA(const std::string& outputFileName,
     // TODO: Support one-to-many relationship between imageGroup and image
     for (const auto& [imageId, _] : imageIdToName) {
         // For each image, we create a vector with a single imageId
-        auto imageIdsVector = builder.CreateVector<int32_t>(&imageId, 1);
+        auto imageIdsVector = builder.CreateVector(&imageId, 1);
         auto imageGroupOffset = ImageAssociationModel::CreateImageGroup(builder, imageIdsVector);
         imageGroupOffsets.push_back(imageGroupOffset);
     }
