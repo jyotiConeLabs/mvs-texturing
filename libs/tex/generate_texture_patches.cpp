@@ -14,7 +14,7 @@
 #include <mve/image_tools.h>
 #include <Eigen/SparseCore>
 #include <Eigen/SparseLU>
-#include "image_association_model_generated.h"
+#include "flatbuffers/flatbuffers.h"
 
 #include "texturing.h"
 
@@ -36,57 +36,6 @@ T clamp_nan_hi(T const & v, T const & lo, T const & hi) {
 template <typename T>
 T clamp(T const & v, T const & lo, T const & hi) {
     return (v < lo) ? lo : ((v > hi) ? hi : v);
-}
-
-void serializeToCLIA(const std::string& outputFileName,
-                     const std::map<unsigned long, int>& vertexToImageId,
-                     const std::map<int, std::string>& imageIdToName) {
-    
-    std::cout << "Saving View Associations -1" << std::endl;
-    
-    flatbuffers::FlatBufferBuilder builder(1024);
-    std::cout << "Saving View Associations" << std::endl;
-    // Serialized ImageFile objects
-    std::vector<flatbuffers::Offset<ImageAssociationModel::ImageFile>> imageFileOffsets;
-
-    // Serialize ImageFile data
-    for (const auto& [imageId, imageName] : imageIdToName) {
-        auto filenameOffset = builder.CreateString(imageName);
-        auto imageFileOffset = ImageAssociationModel::CreateImageFile(builder, imageId, filenameOffset);
-        imageFileOffsets.push_back(imageFileOffset);
-    }
-
-    std::cout << "Saving View Associations 2" << std::endl;
-    // Serialized ImageGroup objects
-    std::vector<flatbuffers::Offset<ImageAssociationModel::ImageGroup>> imageGroupOffsets;
-
-    // Serialize ImageGroup data. Each image has its own unique group
-    // TODO: Support one-to-many relationship between imageGroup and image
-    for (const auto& [imageId, _] : imageIdToName) {
-        // For each image, we create a vector with a single imageId
-        auto imageIdsVector = builder.CreateVector(&imageId, 1);
-        auto imageGroupOffset = ImageAssociationModel::CreateImageGroup(builder, imageIdsVector);
-        imageGroupOffsets.push_back(imageGroupOffset);
-    }
-
-    std::cout << "Saving View Associations 3" << std::endl;
-    // Serialize ModelData, which will encapsulate all our data
-    auto imagesOffset = builder.CreateVector(imageFileOffsets);
-    auto imageGroupsOffset = builder.CreateVector(imageGroupOffsets);
-    auto modelData = ImageAssociationModel::CreateModelData(builder, imagesOffset, imageGroupsOffset);
-
-    // Complete the serialization by attaching a file identifier
-    ImageAssociationModel::FinishModelDataBuffer(builder, modelData);
-
-    std::cout << "Saving View Associations 4" << std::endl;
-    // Write the serialized data to file
-    std::ofstream outFile(outputFileName, std::ios::binary);
-    if (!outFile.is_open()) {
-        std::cerr << "Failed to open output file: " << outputFileName << std::endl;
-        return;
-    }
-    outFile.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
-    outFile.close();
 }
 
 void merge_vertex_projection_infos(std::vector<std::vector<VertexProjectionInfo> > * vertex_projection_infos) {
@@ -134,7 +83,7 @@ struct TexturePatchCandidate {
 TexturePatchCandidate
 generate_candidate(int label, TextureView const & texture_view,
     std::vector<std::size_t> const & faces, mve::TriangleMesh::ConstPtr mesh,
-    Settings const & settings, std::map<unsigned long, int> &image_associations) {
+    Settings const & settings, std::map<unsigned long, unsigned int> &image_associations) {
     
     mve::ImageBase::Ptr view_image = texture_view.get_image();
     int min_x = view_image->width(), min_y = view_image->height();
@@ -152,7 +101,7 @@ generate_candidate(int label, TextureView const & texture_view,
             // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
 
-            image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<int>(label);
+            image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<unsigned int>(label);
             
             math::Vec3f vertex = vertices[mesh_faces[faces[i] * 3 + j]];
             math::Vec2f pixel = texture_view.get_pixel_coords(vertex);
@@ -533,7 +482,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     mve::MeshInfo const & mesh_info,
     std::vector<TextureView> * texture_views, Settings const & settings,
     std::vector<std::vector<VertexProjectionInfo> > * vertex_projection_infos,
-    std::vector<TexturePatch::Ptr> * texture_patches, std::string& image_asso_file) {
+    std::vector<TexturePatch::Ptr> * texture_patches) {
 
     util::WallTimer timer;
 
@@ -543,8 +492,8 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     std::size_t num_patches = 0;
 
-    std::map<unsigned long, int> image_associations; 
-    std::map<int, std::string> image_names;
+    std::map<unsigned long, unsigned int> image_associations; 
+    std::map<unsigned int, std::string> image_names;
 
     std::cout << "\tRunning... " << std::flush;
     #pragma omp parallel for schedule(dynamic)
@@ -557,11 +506,11 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         std::vector<std::vector<std::size_t> > subgraphs;
         int const label = i + 1;
         graph.get_subgraphs(label, &subgraphs);
+
         TextureView * texture_view = &texture_views->at(i);
-        image_names[static_cast<int>(label)] = static_cast<std::string>(texture_view->image_file);
+        image_names[i] = static_cast<std::string>(texture_view->image_file);
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
-        std::cout << "\tRunning... 2" << std::flush;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
             candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, image_associations));
         }
@@ -621,9 +570,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
-    std::cout << "Saving View Associations -2" << std::endl;
-    // serializeToCLIA(image_asso_file, image_associations, image_names);
-    for (auto i : image_names) {
+    for (auto i : image_associations) {
         std::cout << '\t' << i.first << '\t' << i.second << '\n';
     }
 
