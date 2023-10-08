@@ -14,6 +14,7 @@
 #include <mve/image_tools.h>
 #include <Eigen/SparseCore>
 #include <Eigen/SparseLU>
+#include "flatbuffers.h"
 
 #include "texturing.h"
 
@@ -112,6 +113,8 @@ generate_candidate(int label, TextureView const & texture_view,
         }
     }
 
+    std::cout << "Num Vertices: " << vertex_indices.size() << std::endl;
+    
     for (std::size_t i = 0; i < vertex_indices.size(); ++i) {
         std::cout << "Vertex Id: " << vertex_indices[i] << std::endl;
     }
