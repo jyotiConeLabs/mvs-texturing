@@ -42,7 +42,9 @@ void serializeToCLIA(const std::string& outputFileName,
                      const std::map<unsigned long, int>& vertexToImageId,
                      const std::map<int, std::string>& imageIdToName) {
     
-    flatbuffers::FlatBufferBuilder builder;
+    std::cout << "Saving View Associations -1" << std::endl;
+    
+    flatbuffers::FlatBufferBuilder builder(1024);
     std::cout << "Saving View Associations" << std::endl;
     // Serialized ImageFile objects
     std::vector<flatbuffers::Offset<ImageAssociationModel::ImageFile>> imageFileOffsets;
@@ -618,7 +620,8 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
             }
         }
     }
-    
+
+    std::cout << "Saving View Associations -2" << std::endl;
     serializeToCLIA(image_asso_file, image_associations, image_names);
     // for (auto i : image_associations) {
     //     std::cout << '\t' << i.first << '\t' << i.second << '\n';
