@@ -83,7 +83,7 @@ struct TexturePatchCandidate {
 TexturePatchCandidate
 generate_candidate(int label, TextureView const & texture_view,
     std::vector<std::size_t> const & faces, mve::TriangleMesh::ConstPtr mesh,
-    Settings const & settings) {
+    Settings const & settings, std::map<unsigned long, std::string> &image_associations) {
     
     mve::ImageBase::Ptr view_image = texture_view.get_image();
     int min_x = view_image->width(), min_y = view_image->height();
@@ -93,13 +93,15 @@ generate_candidate(int label, TextureView const & texture_view,
     mve::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
     std::cout << "Logging" << std::endl;
     std::vector<math::Vec2f> texcoords;
-    std::vector<unsigned long> vertex_indices;
+    // std::vector<unsigned long> vertex_indices;
     for (std::size_t i = 0; i < faces.size(); ++i) {
         for (std::size_t j = 0; j < 3; ++j) {
             // std::cout << "Vertex Id: " << mesh_faces[faces[i] * 3 + j] << std::endl;
-            vertex_indices.push_back(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]));
+            // vertex_indices.push_back(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]));
             // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
+
+            image_associations[mesh_faces[faces[i] * 3 + j]] = texture_view.image_file;
             
             math::Vec3f vertex = vertices[mesh_faces[faces[i] * 3 + j]];
             math::Vec2f pixel = texture_view.get_pixel_coords(vertex);
@@ -490,6 +492,8 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     std::size_t num_patches = 0;
 
+    std::map<unsigned long, std::string> image_associations;
+
     std::cout << "\tRunning... " << std::flush;
     #pragma omp parallel for schedule(dynamic)
 #if !defined(_MSC_VER)
@@ -506,7 +510,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
-            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings));
+            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, image_associations));
         }
         texture_view->release_image();
 
