@@ -158,12 +158,13 @@ int main(int argc, char **argv) {
         tex::TexturePatches texture_patches;
         tex::VertexProjectionInfos vertex_projection_infos;
         std::cout << "Generating texture patches:" << std::endl;
+        std::string image_asso_file = conf.out_prefix + "_image_association.clia";
         tex::generate_texture_patches(graph, mesh, mesh_info, &texture_views,
             conf.settings, &vertex_projection_infos, &texture_patches);
 
         if (conf.settings.global_seam_leveling) {
             std::cout << "Running global seam leveling:" << std::endl;
-            tex::global_seam_leveling(graph, mesh, mesh_info, vertex_projection_infos, &texture_patches);
+            tex::global_seam_leveling(graph, mesh, mesh_info, vertex_projection_infos, &texture_patches, image_asso_file);
             timer.measure("Running global seam leveling");
         } else {
             ProgressCounter texture_patch_counter("Calculating validity masks for texture patches", texture_patches.size());
