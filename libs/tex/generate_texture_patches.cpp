@@ -557,7 +557,6 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         std::vector<std::vector<std::size_t> > subgraphs;
         int const label = i + 1;
         graph.get_subgraphs(label, &subgraphs);
-        std::cout << "\tRunning... 2" << std::flush;
         TextureView * texture_view = &texture_views->at(i);
         image_names[static_cast<int>(label)] = static_cast<std::string>(texture_view->image_file);
         texture_view->load_image();
@@ -623,9 +622,9 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     std::cout << "Saving View Associations -2" << std::endl;
     // serializeToCLIA(image_asso_file, image_associations, image_names);
-    // for (auto i : image_associations) {
-    //     std::cout << '\t' << i.first << '\t' << i.second << '\n';
-    // }
+    for (auto i : image_names) {
+        std::cout << '\t' << i.first << '\t' << i.second << '\n';
+    }
 
     merge_vertex_projection_infos(vertex_projection_infos);
 
