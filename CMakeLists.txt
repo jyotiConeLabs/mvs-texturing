@@ -59,7 +59,7 @@ include_directories(SYSTEM
 
 include_directories(
     libs
-    ${CMAKE_SOURCE_DIR}/flatbuffers
+    ${CMAKE_SOURCE_DIR}
 )
 
 add_subdirectory(libs)
