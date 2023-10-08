@@ -91,7 +91,7 @@ generate_candidate(int label, TextureView const & texture_view,
 
     mve::TriangleMesh::FaceList const & mesh_faces = mesh->get_faces();
     mve::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
-    std::cout << "Logging" << std::endl;
+    // std::cout << "Logging" << std::endl;
     std::vector<math::Vec2f> texcoords;
     // std::vector<unsigned long> vertex_indices;
     for (std::size_t i = 0; i < faces.size(); ++i) {
