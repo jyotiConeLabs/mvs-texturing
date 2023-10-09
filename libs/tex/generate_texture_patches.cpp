@@ -538,12 +538,16 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     std::cout << "\tRunning... " << std::flush;
 
-    #pragma omp declare reduction_imagegroups (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
-    #pragma omp declare reduction_imagefilenames (merge : std::vector<std::string> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
-    std::vector<std::pair<unsigned long, int>> image_groups;
     std::vector<std::string> image_filenames;
+    for (std::size_t i = 0; i < texture_views->size(); ++i) {
+        TextureView * texture_view = &texture_views->at(i);
+        image_filenames.push_back(texture_views->image_file);
+    }
 
-    #pragma omp parallel for reduction_imagegroups(merge: image_groups) reduction_imagefilenames(merge: image_filenames)
+    #pragma omp declare reduction (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
+    std::vector<std::pair<unsigned long, int>> image_group_pairs;
+
+    #pragma omp parallel for reduction(merge: image_group_pairs)
 #if !defined(_MSC_VER)
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
 #else
@@ -555,11 +559,10 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         graph.get_subgraphs(label, &subgraphs);
 
         TextureView * texture_view = &texture_views->at(i);
-        image_filenames.push_back(texture_view->image_file);
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
-            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, image_groups));
+            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, image_group_pairs));
         }
         texture_view->release_image();
 
@@ -615,6 +618,12 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
                 }
             }
         }
+    }
+
+    std::vector<std::vector<unsigned int>> image_groups(image_group_pairs.size());
+    
+    for (const auto& group : image_group_pairs) {
+        image_groups[group.first] = {group.second};
     }
 
     // // Define your image filenames
