@@ -123,7 +123,7 @@ struct TexturePatchCandidate {
 TexturePatchCandidate
 generate_candidate(int label, TextureView const & texture_view,
     std::vector<std::size_t> const & faces, mve::TriangleMesh::ConstPtr mesh,
-    Settings const & settings) {
+    Settings const & settings, std::vector<std::pair<unsigned long, int>>& image_groups) {
     
     mve::ImageBase::Ptr view_image = texture_view.get_image();
     int min_x = view_image->width(), min_y = view_image->height();
@@ -133,7 +133,7 @@ generate_candidate(int label, TextureView const & texture_view,
     mve::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
     // std::cout << "Logging" << std::endl;
     std::vector<math::Vec2f> texcoords;
-    std::vector<std::pair<unsigned long, int>> image_groups;
+    
     for (std::size_t i = 0; i < faces.size(); ++i) {
         for (std::size_t j = 0; j < 3; ++j) {
             // std::cout << "Vertex Id: " << mesh_faces[faces[i] * 3 + j] << std::endl;
@@ -537,7 +537,11 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     // std::map<unsigned int, std::string> image_names;
 
     std::cout << "\tRunning... " << std::flush;
-    #pragma omp parallel for schedule(dynamic)
+
+    #pragma omp declare reduction (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
+    std::vector<std::pair<unsigned long, int>> image_groups
+
+    #pragma omp parallel for schedule(dynamic) reduction(merge: image_groups)
 #if !defined(_MSC_VER)
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
 #else
@@ -553,7 +557,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
-            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings));
+            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, image_groups));
         }
         texture_view->release_image();
 
