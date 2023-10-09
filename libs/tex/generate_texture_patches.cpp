@@ -611,21 +611,21 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
-    // Define your image filenames
-    std::vector<std::string> image_filenames = {"image1.jpg", "image2.jpg", "image3.jpg"};
+    // // Define your image filenames
+    // std::vector<std::string> image_filenames = {"image1.jpg", "image2.jpg", "image3.jpg"};
 
-    // Create an image group for each filename with a 1:1 correspondence.
-    std::vector<std::vector<unsigned int>> image_groups;
+    // // Create an image group for each filename with a 1:1 correspondence.
+    // std::vector<std::vector<unsigned int>> image_groups;
 
-    for (unsigned int i = 0; i < image_filenames.size(); ++i) {
-        image_groups.push_back({i});  // Each group contains exactly one image index.
-    }
+    // for (unsigned int i = 0; i < image_filenames.size(); ++i) {
+    //     image_groups.push_back({i});  // Each group contains exactly one image index.
+    // }
 
-    // Your desired output file path
-    std::string output_filepath = "/datasets/output.clia";
+    // // Your desired output file path
+    // std::string output_filepath = "/datasets/output.clia";
 
-    // Call the function
-    WriteCliaFile(output_filepath, image_groups, image_filenames);
+    // // Call the function
+    // WriteCliaFile(output_filepath, image_groups, image_filenames);
 
     merge_vertex_projection_infos(vertex_projection_infos);
 
