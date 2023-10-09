@@ -620,7 +620,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     }
 
     // Your desired output file path
-    std::string output_filepath = "/dataset/output.clia";
+    std::string output_filepath = "/datasets/output.clia";
 
     // Call the function
     WriteCliaFile(output_filepath, image_groups, image_filenames);
