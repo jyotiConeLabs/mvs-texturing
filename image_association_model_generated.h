@@ -15,90 +15,24 @@ static_assert(FLATBUFFERS_VERSION_MAJOR == 23 &&
 
 namespace ImageAssociationModel {
 
-struct ImageFile;
-struct ImageFileBuilder;
-
 struct ImageGroup;
 struct ImageGroupBuilder;
 
 struct ModelData;
 struct ModelDataBuilder;
 
-struct ImageFile FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
-  typedef ImageFileBuilder Builder;
-  enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_ID = 4,
-    VT_FILENAME = 6
-  };
-  int32_t id() const {
-    return GetField<int32_t>(VT_ID, 0);
-  }
-  const ::flatbuffers::String *filename() const {
-    return GetPointer<const ::flatbuffers::String *>(VT_FILENAME);
-  }
-  bool Verify(::flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_ID, 4) &&
-           VerifyOffset(verifier, VT_FILENAME) &&
-           verifier.VerifyString(filename()) &&
-           verifier.EndTable();
-  }
-};
-
-struct ImageFileBuilder {
-  typedef ImageFile Table;
-  ::flatbuffers::FlatBufferBuilder &fbb_;
-  ::flatbuffers::uoffset_t start_;
-  void add_id(int32_t id) {
-    fbb_.AddElement<int32_t>(ImageFile::VT_ID, id, 0);
-  }
-  void add_filename(::flatbuffers::Offset<::flatbuffers::String> filename) {
-    fbb_.AddOffset(ImageFile::VT_FILENAME, filename);
-  }
-  explicit ImageFileBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  ::flatbuffers::Offset<ImageFile> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = ::flatbuffers::Offset<ImageFile>(end);
-    return o;
-  }
-};
-
-inline ::flatbuffers::Offset<ImageFile> CreateImageFile(
-    ::flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t id = 0,
-    ::flatbuffers::Offset<::flatbuffers::String> filename = 0) {
-  ImageFileBuilder builder_(_fbb);
-  builder_.add_filename(filename);
-  builder_.add_id(id);
-  return builder_.Finish();
-}
-
-inline ::flatbuffers::Offset<ImageFile> CreateImageFileDirect(
-    ::flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t id = 0,
-    const char *filename = nullptr) {
-  auto filename__ = filename ? _fbb.CreateString(filename) : 0;
-  return ImageAssociationModel::CreateImageFile(
-      _fbb,
-      id,
-      filename__);
-}
-
 struct ImageGroup FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef ImageGroupBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_IMAGE_IDS = 4
+    VT_IMAGE_INDICES = 4
   };
-  const ::flatbuffers::Vector<int32_t> *image_ids() const {
-    return GetPointer<const ::flatbuffers::Vector<int32_t> *>(VT_IMAGE_IDS);
+  const ::flatbuffers::Vector<uint32_t> *image_indices() const {
+    return GetPointer<const ::flatbuffers::Vector<uint32_t> *>(VT_IMAGE_INDICES);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_IMAGE_IDS) &&
-           verifier.VerifyVector(image_ids()) &&
+           VerifyOffset(verifier, VT_IMAGE_INDICES) &&
+           verifier.VerifyVector(image_indices()) &&
            verifier.EndTable();
   }
 };
@@ -107,8 +41,8 @@ struct ImageGroupBuilder {
   typedef ImageGroup Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
-  void add_image_ids(::flatbuffers::Offset<::flatbuffers::Vector<int32_t>> image_ids) {
-    fbb_.AddOffset(ImageGroup::VT_IMAGE_IDS, image_ids);
+  void add_image_indices(::flatbuffers::Offset<::flatbuffers::Vector<uint32_t>> image_indices) {
+    fbb_.AddOffset(ImageGroup::VT_IMAGE_INDICES, image_indices);
   }
   explicit ImageGroupBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -123,38 +57,38 @@ struct ImageGroupBuilder {
 
 inline ::flatbuffers::Offset<ImageGroup> CreateImageGroup(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    ::flatbuffers::Offset<::flatbuffers::Vector<int32_t>> image_ids = 0) {
+    ::flatbuffers::Offset<::flatbuffers::Vector<uint32_t>> image_indices = 0) {
   ImageGroupBuilder builder_(_fbb);
-  builder_.add_image_ids(image_ids);
+  builder_.add_image_indices(image_indices);
   return builder_.Finish();
 }
 
 inline ::flatbuffers::Offset<ImageGroup> CreateImageGroupDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<int32_t> *image_ids = nullptr) {
-  auto image_ids__ = image_ids ? _fbb.CreateVector<int32_t>(*image_ids) : 0;
+    const std::vector<uint32_t> *image_indices = nullptr) {
+  auto image_indices__ = image_indices ? _fbb.CreateVector<uint32_t>(*image_indices) : 0;
   return ImageAssociationModel::CreateImageGroup(
       _fbb,
-      image_ids__);
+      image_indices__);
 }
 
 struct ModelData FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef ModelDataBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_IMAGES = 4,
+    VT_IMAGE_FILENAMES = 4,
     VT_IMAGE_GROUPS = 6
   };
-  const ::flatbuffers::Vector<::flatbuffers::Offset<ImageAssociationModel::ImageFile>> *images() const {
-    return GetPointer<const ::flatbuffers::Vector<::flatbuffers::Offset<ImageAssociationModel::ImageFile>> *>(VT_IMAGES);
+  const ::flatbuffers::Vector<::flatbuffers::Offset<::flatbuffers::String>> *image_filenames() const {
+    return GetPointer<const ::flatbuffers::Vector<::flatbuffers::Offset<::flatbuffers::String>> *>(VT_IMAGE_FILENAMES);
   }
   const ::flatbuffers::Vector<::flatbuffers::Offset<ImageAssociationModel::ImageGroup>> *image_groups() const {
     return GetPointer<const ::flatbuffers::Vector<::flatbuffers::Offset<ImageAssociationModel::ImageGroup>> *>(VT_IMAGE_GROUPS);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_IMAGES) &&
-           verifier.VerifyVector(images()) &&
-           verifier.VerifyVectorOfTables(images()) &&
+           VerifyOffset(verifier, VT_IMAGE_FILENAMES) &&
+           verifier.VerifyVector(image_filenames()) &&
+           verifier.VerifyVectorOfStrings(image_filenames()) &&
            VerifyOffset(verifier, VT_IMAGE_GROUPS) &&
            verifier.VerifyVector(image_groups()) &&
            verifier.VerifyVectorOfTables(image_groups()) &&
@@ -166,8 +100,8 @@ struct ModelDataBuilder {
   typedef ModelData Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
-  void add_images(::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<ImageAssociationModel::ImageFile>>> images) {
-    fbb_.AddOffset(ModelData::VT_IMAGES, images);
+  void add_image_filenames(::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<::flatbuffers::String>>> image_filenames) {
+    fbb_.AddOffset(ModelData::VT_IMAGE_FILENAMES, image_filenames);
   }
   void add_image_groups(::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<ImageAssociationModel::ImageGroup>>> image_groups) {
     fbb_.AddOffset(ModelData::VT_IMAGE_GROUPS, image_groups);
@@ -185,23 +119,23 @@ struct ModelDataBuilder {
 
 inline ::flatbuffers::Offset<ModelData> CreateModelData(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    ::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<ImageAssociationModel::ImageFile>>> images = 0,
+    ::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<::flatbuffers::String>>> image_filenames = 0,
     ::flatbuffers::Offset<::flatbuffers::Vector<::flatbuffers::Offset<ImageAssociationModel::ImageGroup>>> image_groups = 0) {
   ModelDataBuilder builder_(_fbb);
   builder_.add_image_groups(image_groups);
-  builder_.add_images(images);
+  builder_.add_image_filenames(image_filenames);
   return builder_.Finish();
 }
 
 inline ::flatbuffers::Offset<ModelData> CreateModelDataDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<::flatbuffers::Offset<ImageAssociationModel::ImageFile>> *images = nullptr,
+    const std::vector<::flatbuffers::Offset<::flatbuffers::String>> *image_filenames = nullptr,
     const std::vector<::flatbuffers::Offset<ImageAssociationModel::ImageGroup>> *image_groups = nullptr) {
-  auto images__ = images ? _fbb.CreateVector<::flatbuffers::Offset<ImageAssociationModel::ImageFile>>(*images) : 0;
+  auto image_filenames__ = image_filenames ? _fbb.CreateVector<::flatbuffers::Offset<::flatbuffers::String>>(*image_filenames) : 0;
   auto image_groups__ = image_groups ? _fbb.CreateVector<::flatbuffers::Offset<ImageAssociationModel::ImageGroup>>(*image_groups) : 0;
   return ImageAssociationModel::CreateModelData(
       _fbb,
-      images__,
+      image_filenames__,
       image_groups__);
 }
 
