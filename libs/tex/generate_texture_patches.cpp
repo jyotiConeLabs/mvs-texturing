@@ -133,14 +133,15 @@ generate_candidate(int label, TextureView const & texture_view,
     mve::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
     // std::cout << "Logging" << std::endl;
     std::vector<math::Vec2f> texcoords;
-    // std::vector<unsigned long> vertex_indices;
+    std::vector<std::pair<unsigned long, int>> image_groups;
     for (std::size_t i = 0; i < faces.size(); ++i) {
         for (std::size_t j = 0; j < 3; ++j) {
             // std::cout << "Vertex Id: " << mesh_faces[faces[i] * 3 + j] << std::endl;
             // vertex_indices.push_back(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]));
             // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
-
+            std::pair<unsigned long, int> data_pair(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]), static_cast<int>(label)-1);
+            image_groups.push_back(data_pair);
             // image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<int>(label);
             
             math::Vec3f vertex = vertices[mesh_faces[faces[i] * 3 + j]];
