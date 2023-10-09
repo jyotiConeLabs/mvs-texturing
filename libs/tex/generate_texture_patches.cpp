@@ -15,6 +15,8 @@
 #include <mve/image_tools.h>
 #include <Eigen/SparseCore>
 #include <Eigen/SparseLU>
+#include <fstream>
+#include <iostream>
 #include "image_association_model_generated.h"
 
 #include "texturing.h"
