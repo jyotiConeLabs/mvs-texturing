@@ -101,7 +101,7 @@ generate_candidate(int label, TextureView const & texture_view,
             // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
 
-            image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<std::string>(texture_view.image_file;
+            image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<std::string>(texture_view.image_file);
             
             math::Vec3f vertex = vertices[mesh_faces[faces[i] * 3 + j]];
             math::Vec2f pixel = texture_view.get_pixel_coords(vertex);
