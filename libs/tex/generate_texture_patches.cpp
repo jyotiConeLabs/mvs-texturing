@@ -15,7 +15,7 @@
 #include <mve/image_tools.h>
 #include <Eigen/SparseCore>
 #include <Eigen/SparseLU>
-#include "flatbuffers/flatbuffers.h"
+#include "image_association_model_generated.h"
 
 #include "texturing.h"
 
@@ -37,6 +37,41 @@ T clamp_nan_hi(T const & v, T const & lo, T const & hi) {
 template <typename T>
 T clamp(T const & v, T const & lo, T const & hi) {
     return (v < lo) ? lo : ((v > hi) ? hi : v);
+}
+
+void WriteCliaFile(const std::string& output_filepath, 
+                   const std::vector<std::vector<unsigned int>>& imageGroups, 
+                   const std::vector<std::string>& imageFilenames) 
+{
+    flatbuffers::FlatBufferBuilder builder;
+
+    // Create FlatBuffers string vectors.
+    std::vector<flatbuffers::Offset<flatbuffers::String>> imageFilenamesOffsets;
+    for (const auto& name : imageFilenames) {
+        imageFilenamesOffsets.push_back(builder.CreateString(name));
+    }
+
+    // Create ImageGroup Vectors.
+    std::vector<flatbuffers::Offset<ImageAssociationModel::ImageGroup>> imageGroupsOffsets;
+    for (const auto& group : imageGroups) {
+        auto groupOffsets = builder.CreateVector(group);
+        imageGroupsOffsets.push_back(ImageAssociationModel::CreateImageGroup(builder, groupOffsets));
+    }
+
+    // Create Vectors in the builder.
+    auto filenamesVector = builder.CreateVector(imageFilenamesOffsets);
+    auto groupsVector = builder.CreateVector(imageGroupsOffsets);
+
+    // Create the root table.
+    auto modelData = ImageAssociationModel::CreateModelData(builder, filenamesVector, groupsVector);
+
+    // Finish the build.
+    builder.Finish(modelData, ImageAssociationModel::ModelDataIdentifier());
+
+    // Write data to disk.
+    std::ofstream ofs(output_filepath, std::ios::binary);
+    ofs.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
+    ofs.close();
 }
 
 void merge_vertex_projection_infos(std::vector<std::vector<VertexProjectionInfo> > * vertex_projection_infos) {
@@ -84,7 +119,7 @@ struct TexturePatchCandidate {
 TexturePatchCandidate
 generate_candidate(int label, TextureView const & texture_view,
     std::vector<std::size_t> const & faces, mve::TriangleMesh::ConstPtr mesh,
-    Settings const & settings, std::unordered_map<unsigned long, int> &image_associations) {
+    Settings const & settings) {
     
     mve::ImageBase::Ptr view_image = texture_view.get_image();
     int min_x = view_image->width(), min_y = view_image->height();
@@ -102,7 +137,7 @@ generate_candidate(int label, TextureView const & texture_view,
             // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
 
-            image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<int>(label);
+            // image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<int>(label);
             
             math::Vec3f vertex = vertices[mesh_faces[faces[i] * 3 + j]];
             math::Vec2f pixel = texture_view.get_pixel_coords(vertex);
@@ -493,11 +528,11 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     std::size_t num_patches = 0;
 
-    std::unordered_map<unsigned long, int> image_associations; 
+    // std::unordered_map<unsigned long, int> image_associations; 
     // std::map<unsigned int, std::string> image_names;
 
     std::cout << "\tRunning... " << std::flush;
-    #pragma omp parallel for schedule(dynamic) reduction(merge:image_associations)
+    #pragma omp parallel for schedule(dynamic)
 #if !defined(_MSC_VER)
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
 #else
@@ -513,7 +548,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
-            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, image_associations));
+            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings));
         }
         texture_view->release_image();
 
@@ -571,9 +606,21 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
-    // for (auto i : image_names) {
-    //     std::cout << '\t' << i.first << '\t' << i.second << '\n';
-    // }
+    // Define your image filenames
+    std::vector<std::string> image_filenames = {"image1.jpg", "image2.jpg", "image3.jpg"};
+
+    // Create an image group for each filename with a 1:1 correspondence.
+    std::vector<std::vector<unsigned int>> image_groups;
+
+    for (unsigned int i = 0; i < image_filenames.size(); ++i) {
+        image_groups.push_back({i});  // Each group contains exactly one image index.
+    }
+
+    // Your desired output file path
+    std::string output_filepath = "/dataset/output.clia";
+
+    // Call the function
+    WriteCliaFile(output_filepath, image_groups, image_filenames);
 
     merge_vertex_projection_infos(vertex_projection_infos);
 
