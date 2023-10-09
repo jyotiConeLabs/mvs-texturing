@@ -84,7 +84,7 @@ struct TexturePatchCandidate {
 TexturePatchCandidate
 generate_candidate(int label, TextureView const & texture_view,
     std::vector<std::size_t> const & faces, mve::TriangleMesh::ConstPtr mesh,
-    Settings const & settings, std::unordered_map<unsigned long, std::string> &image_associations) {
+    Settings const & settings, std::unordered_map<unsigned long, int> &image_associations) {
     
     mve::ImageBase::Ptr view_image = texture_view.get_image();
     int min_x = view_image->width(), min_y = view_image->height();
@@ -102,7 +102,7 @@ generate_candidate(int label, TextureView const & texture_view,
             // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
 
-            image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<std::string>(texture_view.image_file);
+            image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<int>(label);
             
             math::Vec3f vertex = vertices[mesh_faces[faces[i] * 3 + j]];
             math::Vec2f pixel = texture_view.get_pixel_coords(vertex);
@@ -493,7 +493,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     std::size_t num_patches = 0;
 
-    std::unordered_map<unsigned long, std::string> image_associations; 
+    std::unordered_map<unsigned long, int> image_associations; 
     // std::map<unsigned int, std::string> image_names;
 
     std::cout << "\tRunning... " << std::flush;
@@ -505,7 +505,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 #endif
 
         std::vector<std::vector<std::size_t> > subgraphs;
-        int const label = i + 1;
+        int label = i + 1;
         graph.get_subgraphs(label, &subgraphs);
 
         TextureView * texture_view = &texture_views->at(i);
