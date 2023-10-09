@@ -68,6 +68,7 @@ void WriteCliaFile(const std::string& output_filepath,
     // Finish the build.
     builder.Finish(modelData, ImageAssociationModel::ModelDataIdentifier());
 
+    std::cout << "Saving to File: " << output_filepath << std::endl;
     // Write data to disk.
     std::ofstream ofs(output_filepath, std::ios::binary);
     ofs.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
