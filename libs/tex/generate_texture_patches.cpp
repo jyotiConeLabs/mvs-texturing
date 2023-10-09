@@ -636,11 +636,11 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     //     image_groups.push_back({i});  // Each group contains exactly one image index.
     // }
 
-    // // Your desired output file path
-    // std::string output_filepath = "/datasets/output.clia";
+    // Your desired output file path
+    std::string output_filepath = "/datasets/output.clia";
 
-    // // Call the function
-    // WriteCliaFile(output_filepath, image_groups, image_filenames);
+    // Call the function
+    WriteCliaFile(output_filepath, image_groups, image_filenames);
 
     merge_vertex_projection_infos(vertex_projection_infos);
 
