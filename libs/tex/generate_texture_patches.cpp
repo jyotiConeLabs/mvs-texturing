@@ -497,7 +497,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     // std::map<unsigned int, std::string> image_names;
 
     std::cout << "\tRunning... " << std::flush;
-    #pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic) reduction(merge:image_associations)
 #if !defined(_MSC_VER)
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
 #else
