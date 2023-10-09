@@ -615,6 +615,10 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
+    for (const auto& group : image_groups) {
+        std::cout << "Elements: " << group.first << " AND " << group.second << std::endl;
+    }
+
     // // Define your image filenames
     // std::vector<std::string> image_filenames = {"image1.jpg", "image2.jpg", "image3.jpg"};
 
