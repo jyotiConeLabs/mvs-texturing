@@ -9,6 +9,7 @@
 
 #include <set>
 #include <list>
+#include <unordered_map>
 
 #include <util/timer.h>
 #include <mve/image_tools.h>
