@@ -540,8 +540,9 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     #pragma omp declare reduction (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
     std::vector<std::pair<unsigned long, int>> image_groups;
+    std::vector<std::string> image_filenames;
 
-    #pragma omp parallel for reduction(merge: image_groups)
+    #pragma omp parallel for reduction(merge: image_groups) reduction(merge: image_filenames)
 #if !defined(_MSC_VER)
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
 #else
@@ -553,7 +554,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         graph.get_subgraphs(label, &subgraphs);
 
         TextureView * texture_view = &texture_views->at(i);
-        // image_names[i] = static_cast<std::string>(texture_view->image_file);
+        image_filenames.push_back(texture_view->image_file);
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
@@ -613,10 +614,6 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
                 }
             }
         }
-    }
-
-    for (const auto& group : image_groups) {
-        std::cout << "Elements: " << group.first << " AND " << group.second << std::endl;
     }
 
     // // Define your image filenames
