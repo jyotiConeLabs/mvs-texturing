@@ -538,11 +538,12 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     std::cout << "\tRunning... " << std::flush;
 
-    #pragma omp declare reduction (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
+    #pragma omp declare reduction_imagegroups (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
+    #pragma omp declare reduction_imagefilenames (merge : std::vector<std::string> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
     std::vector<std::pair<unsigned long, int>> image_groups;
     std::vector<std::string> image_filenames;
 
-    #pragma omp parallel for reduction(merge: image_groups) reduction(merge: image_filenames)
+    #pragma omp parallel for reduction_imagegroups(merge: image_groups) reduction_imagefilenames(merge: image_filenames)
 #if !defined(_MSC_VER)
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
 #else
