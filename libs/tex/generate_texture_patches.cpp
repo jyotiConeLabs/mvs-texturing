@@ -58,7 +58,7 @@ void WriteCliaFile(const std::string& output_filepath,
     for (const auto& group : imageGroups) {
         auto groupOffsets = builder.CreateVector(group);
         imageGroupsOffsets.push_back(ImageAssociationModel::CreateImageGroup(builder, groupOffsets));
-    
+    }
     
 
     // Create Vectors in the builder.
