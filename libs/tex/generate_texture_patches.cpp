@@ -523,7 +523,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     mve::MeshInfo const & mesh_info,
     std::vector<TextureView> * texture_views, Settings const & settings,
     std::vector<std::vector<VertexProjectionInfo> > * vertex_projection_infos,
-    std::vector<TexturePatch::Ptr> * texture_patches) {
+    std::vector<TexturePatch::Ptr> * texture_patches, std::string& output_filepath) {
 
     util::WallTimer timer;
 
@@ -642,7 +642,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     // }
 
     // Your desired output file path
-    std::string output_filepath = "/datasets/output.clia";
+    // std::string output_filepath = "/datasets/output.clia";
 
     // Call the function
     WriteCliaFile(output_filepath, image_groups, image_filenames);
