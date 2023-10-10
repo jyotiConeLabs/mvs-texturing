@@ -42,7 +42,7 @@ T clamp(T const & v, T const & lo, T const & hi) {
 }
 
 void WriteCliaFile(const std::string& output_filepath, 
-                   const std::vector<std::vector<int>>& imageGroups, 
+                   const std::vector<std::vector<unsigned int>>& imageGroups, 
                    const std::vector<std::string>& imageFilenames) 
 {
     flatbuffers::FlatBufferBuilder builder;
@@ -58,7 +58,8 @@ void WriteCliaFile(const std::string& output_filepath,
     for (const auto& group : imageGroups) {
         auto groupOffsets = builder.CreateVector(group);
         imageGroupsOffsets.push_back(ImageAssociationModel::CreateImageGroup(builder, groupOffsets));
-    }
+    
+    
 
     // Create Vectors in the builder.
     auto filenamesVector = builder.CreateVector(imageFilenamesOffsets);
@@ -619,10 +620,10 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
-    std::vector<std::vector<int>> image_groups(image_group_pairs.size());
+    std::vector<std::vector<unsigned int>> image_groups(image_group_pairs.size());
 
     for (std::size_t i = 0; i < image_groups.size(); ++i) {
-        image_groups[i] = {-1};
+        image_groups[i] = {};
     }
     
     for (const auto& group : image_group_pairs) {
