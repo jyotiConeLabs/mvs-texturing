@@ -42,7 +42,7 @@ T clamp(T const & v, T const & lo, T const & hi) {
 }
 
 void WriteCliaFile(const std::string& output_filepath, 
-                   const std::vector<std::vector<unsigned int>>& imageGroups, 
+                   const std::vector<std::vector<int>>& imageGroups, 
                    const std::vector<std::string>& imageFilenames) 
 {
     flatbuffers::FlatBufferBuilder builder;
