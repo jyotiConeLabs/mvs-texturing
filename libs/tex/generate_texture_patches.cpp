@@ -622,7 +622,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     std::vector<std::vector<int>> image_groups(image_group_pairs.size());
 
     for (std::size_t i = 0; i < image_groups.size(); ++i) {
-        image_groups[i] = -1;
+        image_groups[i] = {-1};
     }
     
     for (const auto& group : image_group_pairs) {
