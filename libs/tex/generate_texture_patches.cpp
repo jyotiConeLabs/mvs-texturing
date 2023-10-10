@@ -630,12 +630,6 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     }
 
     std::cout << "SIZE OF IMG GROUPS: " << image_group_pairs.size() << std::endl;
-
-    for (const auto& group : image_groups) {
-        if (group[0] > -1) {
-            std::cout << "Group: " << group[0] << std::endl;
-        }
-    }
     // // Define your image filenames
     // std::vector<std::string> image_filenames = {"image1.jpg", "image2.jpg", "image3.jpg"};
 
@@ -647,10 +641,10 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     // }
 
     // Your desired output file path
-    // std::string output_filepath = "/datasets/output.clia";
+    std::string output_filepath = "/datasets/output.clia";
 
-    // // Call the function
-    // WriteCliaFile(output_filepath, image_groups, image_filenames);
+    // Call the function
+    WriteCliaFile(output_filepath, image_groups, image_filenames);
 
     merge_vertex_projection_infos(vertex_projection_infos);
 
