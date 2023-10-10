@@ -619,9 +619,14 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
-    std::vector<std::vector<unsigned int>> image_groups(image_group_pairs.size());
+    std::vector<std::vector<int>> image_groups(image_group_pairs.size());
+
+    for (std::size_t i = 0; i < image_groups.size(); ++i) {
+        image_groups[i] = -1;
+    }
     
     for (const auto& group : image_group_pairs) {
+        std::cout << "Group: " << group.first << " AND " << group.second << std::endl;
         image_groups[group.first] = {group.second};
     }
 
