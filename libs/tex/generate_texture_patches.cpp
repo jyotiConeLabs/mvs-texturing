@@ -56,7 +56,6 @@ void WriteCliaFile(const std::string& output_filepath,
     // Create ImageGroup Vectors.
     std::vector<flatbuffers::Offset<ImageAssociationModel::ImageGroup>> imageGroupsOffsets;
     for (const auto& group : imageGroups) {
-        std::cout << "Group: " << group[0] << std::endl;
         auto groupOffsets = builder.CreateVector(group);
         imageGroupsOffsets.push_back(ImageAssociationModel::CreateImageGroup(builder, groupOffsets));
     }
@@ -627,6 +626,10 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     }
 
     std::cout << "SIZE OF IMG GROUPS: " << image_group_pairs.size() << std::endl;
+
+    for (const auto& group : image_groups) {
+        std::cout << "Group: " << group[0] << std::endl;
+    }
     // // Define your image filenames
     // std::vector<std::string> image_filenames = {"image1.jpg", "image2.jpg", "image3.jpg"};
 
