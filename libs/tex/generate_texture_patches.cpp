@@ -541,7 +541,9 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     std::vector<std::string> image_filenames;
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
         TextureView * texture_view = &texture_views->at(i);
-        image_filenames.push_back(texture_view->image_file);
+        std::string path = texture_view->image_file;
+        std::string base_filename = path.substr(path.find_last_of("/\\") + 1);
+        image_filenames.push_back(base_filename);
     }
 
     #pragma omp declare reduction (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
