@@ -18,6 +18,7 @@
 #include <fstream>
 #include <iostream>
 #include "image_association_model_generated.h"
+#include "VertexImageMapping_generated.h"
 
 #include "texturing.h"
 
@@ -70,6 +71,26 @@ void WriteCliaFile(const std::string& output_filepath,
 
     // Finish the build.
     builder.Finish(modelData, ImageAssociationModel::ModelDataIdentifier());
+
+    std::cout << "Saving to File: " << output_filepath << std::endl;
+    // Write data to disk.
+    std::ofstream ofs(output_filepath, std::ios::binary);
+    ofs.write(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
+    ofs.close();
+}
+
+void WriteVmapFile(const std::string& output_filepath, 
+                   const std::vector<uint32_t>& vertexImageMap) 
+{
+    flatbuffers::FlatBufferBuilder builder;
+
+    auto vertexMapVector = builder.CreateVector(vertexImageMap);
+
+    // Create the root table.
+    auto vertexMapData = VertexImageMapping::CreateImageGroup(builder, vertexMapVector);
+
+    // Finish the build.
+    builder.Finish(vertexMapData, VertexImageMapping::VertexImageMapIdentifier());
 
     std::cout << "Saving to File: " << output_filepath << std::endl;
     // Write data to disk.
@@ -523,7 +544,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     mve::MeshInfo const & mesh_info,
     std::vector<TextureView> * texture_views, Settings const & settings,
     std::vector<std::vector<VertexProjectionInfo> > * vertex_projection_infos,
-    std::vector<TexturePatch::Ptr> * texture_patches, std::string& output_filepath) {
+    std::vector<TexturePatch::Ptr> * texture_patches, std::string& output_filepath_clia, std::string& output_filepath_vmap) {
 
     util::WallTimer timer;
 
@@ -547,9 +568,9 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     }
 
     #pragma omp declare reduction (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
-    std::vector<std::pair<unsigned long, int>> image_group_pairs;
+    std::vector<std::pair<unsigned long, int>> vertex_image_pair;
 
-    #pragma omp parallel for reduction(merge: image_group_pairs)
+    #pragma omp parallel for reduction(merge: vertex_image_pair)
 #if !defined(_MSC_VER)
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
 #else
@@ -564,7 +585,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
-            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, image_group_pairs));
+            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, vertex_image_pair));
         }
         texture_view->release_image();
 
@@ -622,17 +643,17 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
-    std::vector<std::vector<unsigned int>> image_groups(image_group_pairs.size());
+    std::vector<std::vector<unsigned int>> vertexMap(vertex_image_pair.size());
 
-    for (std::size_t i = 0; i < image_groups.size(); ++i) {
-        image_groups[i] = {};
+    for (std::size_t i = 0; i < vertexMap.size(); ++i) {
+        vertexMap[i] = {};
     }
     
-    for (const auto& group : image_group_pairs) {
-        image_groups[group.first] = {group.second};
+    for (const auto& group : vertex_image_pair) {
+        vertexMap[group.first] = {group.second};
     }
 
-    std::cout << "SIZE OF IMG GROUPS: " << image_group_pairs.size() << std::endl;
+    std::cout << "SIZE OF IMG GROUPS: " << vertex_image_pair.size() << std::endl;
     // // Define your image filenames
     // std::vector<std::string> image_filenames = {"image1.jpg", "image2.jpg", "image3.jpg"};
 
@@ -648,6 +669,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     // Call the function
     WriteCliaFile(output_filepath, image_groups, image_filenames);
+    WriteVmapFile(output_filepath_vmap, vertexMap);
 
     merge_vertex_projection_infos(vertex_projection_infos);
 

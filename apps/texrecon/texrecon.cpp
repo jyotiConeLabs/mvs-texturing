@@ -159,8 +159,9 @@ int main(int argc, char **argv) {
         tex::VertexProjectionInfos vertex_projection_infos;
         std::cout << "Generating texture patches:" << std::endl;
         std::string image_asso_file = conf.out_prefix + "_image_association.clia";
+        std::string output_filepath_vmap = conf.out_prefix + "_vertex_map.vmap";
         tex::generate_texture_patches(graph, mesh, mesh_info, &texture_views,
-            conf.settings, &vertex_projection_infos, &texture_patches, image_asso_file);
+            conf.settings, &vertex_projection_infos, &texture_patches, image_asso_file, output_filepath_vmap);
 
         if (conf.settings.global_seam_leveling) {
             std::cout << "Running global seam leveling:" << std::endl;
@@ -223,8 +224,9 @@ int main(int argc, char **argv) {
             generate_debug_embeddings(&texture_views);
             tex::VertexProjectionInfos vertex_projection_infos; // Will only be written
             std::string image_asso_file = conf.out_prefix + "_image_association.clia";
+            std::string output_filepath_vmap = conf.out_prefix + "_vertex_map.vmap";
             tex::generate_texture_patches(graph, mesh, mesh_info, &texture_views,
-                conf.settings, &vertex_projection_infos, &texture_patches, image_asso_file);
+                conf.settings, &vertex_projection_infos, &texture_patches, image_asso_file, output_filepath_vmap);
             tex::generate_texture_atlases(&texture_patches, conf.settings, &texture_atlases, type, false);
         }
 
