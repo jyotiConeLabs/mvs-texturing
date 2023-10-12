@@ -87,7 +87,7 @@ void WriteVmapFile(const std::string& output_filepath,
     auto vertexMapVector = builder.CreateVector(vertexImageMap);
 
     // Create the root table.
-    auto vertexMapData = VertexImageMapping::CreateImageGroup(builder, vertexMapVector);
+    auto vertexMapData = VertexImageMapping::CreateVertexImageMap(builder, vertexMapVector);
 
     // Finish the build.
     builder.Finish(vertexMapData, VertexImageMapping::VertexImageMapIdentifier());
@@ -161,7 +161,7 @@ generate_candidate(int label, TextureView const & texture_view,
             // vertex_indices.push_back(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]));
             // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
-            std::pair<unsigned long, int> data_pair(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]), static_cast<int>(label)-1);
+            std::pair<unsigned long, int> data_pair(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]), static_cast<int>(label));
             image_groups.push_back(data_pair);
             // image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<int>(label);
             
@@ -560,10 +560,15 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     std::cout << "\tRunning... " << std::flush;
 
     std::vector<std::string> image_filenames;
+    std::vector<std::vector<unsigned int>> image_groups;
+    image_groups.push_back({0});
+    std::string emptyFile("");
+    image_filenames.push_back(emptyFile);
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
         TextureView * texture_view = &texture_views->at(i);
         std::string path = texture_view->image_file;
         std::string base_filename = path.substr(path.find_last_of("/\\") + 1);
+        image_groups.push_back({i+1});
         image_filenames.push_back(base_filename);
     }
 
@@ -643,14 +648,14 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         }
     }
 
-    std::vector<std::vector<unsigned int>> vertexMap(vertex_image_pair.size());
+    std::vector<uint32_t> vertexMap(vertex_image_pair.size());
 
     for (std::size_t i = 0; i < vertexMap.size(); ++i) {
         vertexMap[i] = {};
     }
     
     for (const auto& group : vertex_image_pair) {
-        vertexMap[group.first] = {group.second};
+        vertexMap[group.first] = group.second;
     }
 
     std::cout << "SIZE OF IMG GROUPS: " << vertex_image_pair.size() << std::endl;
@@ -668,7 +673,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     // std::string output_filepath = "/datasets/output.clia";
 
     // Call the function
-    WriteCliaFile(output_filepath, image_groups, image_filenames);
+    WriteCliaFile(output_filepath_clia, image_groups, image_filenames);
     WriteVmapFile(output_filepath_vmap, vertexMap);
 
     merge_vertex_projection_infos(vertex_projection_infos);
