@@ -15,6 +15,7 @@
 UniGraph::UniGraph(std::size_t nodes) {
     adj_lists.resize(nodes);
     labels.resize(nodes);
+    labels_cost_set.resize(nodes);
     edges = 0;
 }
 

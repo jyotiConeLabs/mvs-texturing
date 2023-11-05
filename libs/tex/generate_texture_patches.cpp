@@ -9,6 +9,7 @@
 
 #include <set>
 #include <list>
+#include <boost/container_hash/hash.hpp>
 #include <unordered_map>
 
 #include <util/timer.h>
@@ -17,6 +18,7 @@
 #include <Eigen/SparseLU>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 #include "image_association_model_generated.h"
 #include "VertexImageMapping_generated.h"
 
@@ -144,7 +146,7 @@ struct TexturePatchCandidate {
 TexturePatchCandidate
 generate_candidate(int label, TextureView const & texture_view,
     std::vector<std::size_t> const & faces, mve::TriangleMesh::ConstPtr mesh,
-    Settings const & settings, std::vector<std::pair<unsigned long, int>>& image_groups) {
+    Settings const & settings, std::vector<std::pair<unsigned long, std::vector<std::size_t>>>& image_groups, UniGraph const & graph) {
     
     mve::ImageBase::Ptr view_image = texture_view.get_image();
     int min_x = view_image->width(), min_y = view_image->height();
@@ -156,12 +158,21 @@ generate_candidate(int label, TextureView const & texture_view,
     std::vector<math::Vec2f> texcoords;
     
     for (std::size_t i = 0; i < faces.size(); ++i) {
+        std::vector<std::pair<std::size_t, float>> labels_costs = graph.get_labels_costs(faces[i]);
+        // std::cout << labels_costs[0].first << std::endl << std::flush;
+        std::vector<std::size_t> labels;
+        int limit;
+        if (10 < labels_costs.size()){limit = 10;}else{limit = labels_costs.size();}
+
+        
+        for (std::size_t i = 0; i < limit; ++i) labels.push_back(labels_costs[i].first);
+        
         for (std::size_t j = 0; j < 3; ++j) {
             // std::cout << "Vertex Id: " << mesh_faces[faces[i] * 3 + j] << std::endl;
             // vertex_indices.push_back(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]));
             // std::cout << "Vertex: " << vertices[mesh_faces[faces[i] * 3 + j]] << std::endl;
             // std::cout << "Image Name: " << texture_view.image_file << std::endl;
-            std::pair<unsigned long, int> data_pair(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]), static_cast<int>(label));
+            std::pair<unsigned long, std::vector<std::size_t>> data_pair(static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j]), labels);
             image_groups.push_back(data_pair);
             // image_associations[static_cast<unsigned long>(mesh_faces[faces[i] * 3 + j])] = static_cast<int>(label);
             
@@ -563,17 +574,18 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
     std::vector<std::vector<unsigned int>> image_groups;
     image_groups.push_back({0});
     std::string emptyFile("");
+    // for (std::pair<std::size_t, float> i: labels_costs) std::cout << i.first << std::endl << std::flush;
     image_filenames.push_back(emptyFile);
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
         TextureView * texture_view = &texture_views->at(i);
         std::string path = texture_view->image_file;
         std::string base_filename = path.substr(path.find_last_of("/\\") + 1);
-        image_groups.push_back({i+1});
+        // image_groups.push_back({i+1});
         image_filenames.push_back(base_filename);
     }
 
-    #pragma omp declare reduction (merge : std::vector<std::pair<unsigned long, int>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
-    std::vector<std::pair<unsigned long, int>> vertex_image_pair;
+    #pragma omp declare reduction (merge : std::vector<std::pair<unsigned long, std::vector<std::size_t>>> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end()))
+    std::vector<std::pair<unsigned long, std::vector<std::size_t>>> vertex_image_pair;
 
     #pragma omp parallel for reduction(merge: vertex_image_pair)
 #if !defined(_MSC_VER)
@@ -590,7 +602,7 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
         texture_view->load_image();
         std::list<TexturePatchCandidate> candidates;
         for (std::size_t j = 0; j < subgraphs.size(); ++j) {
-            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, vertex_image_pair));
+            candidates.push_back(generate_candidate(label, *texture_view, subgraphs[j], mesh, settings, vertex_image_pair, graph));
         }
         texture_view->release_image();
 
@@ -650,15 +662,28 @@ generate_texture_patches(UniGraph const & graph, mve::TriangleMesh::ConstPtr mes
 
     std::vector<uint32_t> vertexMap(vertex_image_pair.size());
 
-    for (std::size_t i = 0; i < vertexMap.size(); ++i) {
-        vertexMap[i] = {};
-    }
-    
-    for (const auto& group : vertex_image_pair) {
-        vertexMap[group.first] = group.second;
+    std::unordered_map<std::vector<std::size_t>, std::size_t, boost::hash<std::vector<std::size_t>>> set1;
+    set1.insert({{0}, 0});
+    uint32_t set_counter(1);
+    for (std::size_t i = 0; i < vertex_image_pair.size(); ++i) {
+        std::vector<std::size_t> images = vertex_image_pair[i].second;
+        auto p = set1.insert({images, set_counter});
+        if (p.second){
+            std::vector<unsigned int> imagesVec_mod;
+            for (const auto& image : images) imagesVec_mod.push_back(static_cast<unsigned int>(image));
+            image_groups.push_back(imagesVec_mod);
+            set_counter++;
+        }
     }
 
-    std::cout << "SIZE OF IMG GROUPS: " << vertex_image_pair.size() << std::endl;
+    std::cout << "Size of image groups: " << image_groups.size() << std::endl << std::flush;
+    
+    for (const auto& group : vertex_image_pair) {
+        // std::cout << "group: " << set1[group.second] << std::endl << std::flush;
+        vertexMap[group.first] = static_cast<uint32_t>(set1[group.second]);
+    }
+
+    std::cout << "Size of Vertex Image Maps: " << vertex_image_pair.size() << std::endl;
     // // Define your image filenames
     // std::vector<std::string> image_filenames = {"image1.jpg", "image2.jpg", "image3.jpg"};
 

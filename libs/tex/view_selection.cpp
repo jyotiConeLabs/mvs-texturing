@@ -62,21 +62,36 @@ view_selection(DataCosts const & data_costs, UniGraph * graph, Settings const &)
     std::vector<unary_t> unaries;
     unaries.reserve(data_costs.cols());
     pairwise_t pairwise(1.0f);
+    std::vector< std::vector< std::pair<std::size_t, float> > > labels_cost_set;
+    labels_cost_set.reserve(graph->num_nodes());
     for (std::size_t i = 0; i < data_costs.cols(); ++i) {
         DataCosts::Column const & data_costs_for_node = data_costs.col(i);
 
         std::vector<mapmap::_s_t<cost_t, simd_w> > costs;
+        std::vector< std::pair<std::size_t, float> > labels_costs;
+        labels_costs.reserve(data_costs_for_node.size());
         if (data_costs_for_node.empty()) {
             costs.push_back(1.0f);
+            std::pair<std::size_t, float> label_pair(0, 1.0f);
+            labels_costs.push_back(label_pair);
         } else {
             costs.resize(data_costs_for_node.size());
+            
             for(std::size_t j = 0; j < data_costs_for_node.size(); ++j) {
                 float cost = data_costs_for_node[j].second;
+                std::pair<std::size_t, float> label_pair(data_costs_for_node[j].first+1, data_costs_for_node[j].second);
+                labels_costs.push_back(label_pair);
                 costs[j] = cost;
             }
-
+            std::sort(labels_costs.begin(), labels_costs.end(), [](std::pair<std::size_t, float> &left, std::pair<std::size_t, float> &right) {
+                return left.second < right.second;
+            });
         }
-
+        
+        // if (labels_costs.size() > 1) std::cout << "Costs: " << labels_costs[1].second << std::endl << std::flush;
+        // for (std::pair<std::uint16_t, float> i: labels_costs) std::cout << i.first << std::endl << std::flush;
+        // std::cout << "Positions: " << std::endl << std::flush;
+        labels_cost_set.push_back(labels_costs);
         unaries.emplace_back(i, &label_set);
         unaries.back().set_costs(costs);
     }
@@ -128,6 +143,7 @@ view_selection(DataCosts const & data_costs, UniGraph * graph, Settings const &)
         }
         if (label == 0) undefined += 1;
         graph->set_label(i, static_cast<std::size_t>(label));
+        graph->set_labels_costs(i, labels_cost_set[i]);
     }
     std::cout << '\t' << undefined << " faces have not been seen" << std::endl;
 }

@@ -22,6 +22,7 @@ class UniGraph {
         std::vector<std::vector<std::size_t> > adj_lists;
         std::vector<std::size_t> labels;
         std::size_t edges;
+        std::vector< std::vector< std::pair<std::size_t, float> > > labels_cost_set;
 
     public:
         /**
@@ -62,11 +63,14 @@ class UniGraph {
           */
         void set_label(std::size_t n, std::size_t label);
 
+        void set_labels_costs(std::size_t n, std::vector<std::pair<std::size_t, float>>& labels_costs);
         /**
           * Returns the label of node with index n.
           * @warning asserts that the index is valid.
           */
         std::size_t get_label(std::size_t n) const;
+
+        std::vector<std::pair<std::size_t, float>> get_labels_costs(std::size_t n) const;
 
         /**
           * Fills given vector with all subgraphs of the given label.
@@ -125,10 +129,22 @@ UniGraph::set_label(std::size_t n, std::size_t label) {
     labels[n] = label;
 }
 
+inline void
+UniGraph::set_labels_costs(std::size_t n, std::vector<std::pair<std::size_t, float>>& labels_costs) {
+    assert(n < num_nodes());
+    labels_cost_set[n] = labels_costs;
+}
+
 inline std::size_t
 UniGraph::get_label(std::size_t n) const {
     assert(n < num_nodes());
     return labels[n];
+}
+
+inline std::vector<std::pair<std::size_t, float>>
+UniGraph::get_labels_costs(std::size_t n) const {
+    assert(n < num_nodes());
+    return labels_cost_set[n];
 }
 
 inline std::vector<std::size_t> const &
